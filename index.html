@@ -112,7 +112,7 @@
             40%, 60% { transform: translate3d(4px, 0, 0); }
         }
 
-        /* Botões */
+        /* Botões Gerais */
         .btn {
             width: 100%;
             padding: 15px;
@@ -135,6 +135,50 @@
         .btn-secondary { background-color: var(--secondary); border-bottom-color: var(--secondary-shadow); }
         .btn-accent { background-color: var(--accent); border-bottom-color: var(--accent-shadow); }
 
+        /* Botão PLAY */
+        .btn-play {
+            background-color: var(--primary);
+            border-bottom-color: var(--primary-shadow);
+            font-size: 1.5rem;
+            margin-top: 20px;
+            padding: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Botões de Seleção de Idioma */
+        .lang-options {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .btn-lang {
+            flex: 1;
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--neutral);
+            border-bottom: 4px solid var(--neutral);
+            border-radius: var(--radius);
+            color: #999;
+            font-family: 'Fredoka', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-lang.selected {
+            border-color: var(--secondary);
+            border-bottom-color: var(--secondary-shadow);
+            background-color: #E1F5FE;
+            color: var(--secondary);
+            transform: translateY(2px);
+            border-bottom-width: 2px;
+        }
+
         .btn-back {
             position: absolute; top: 20px; left: 20px; width: 45px; height: 45px;
             border-radius: 50%; background: #FFF; border: 2px solid var(--neutral);
@@ -145,17 +189,16 @@
         .btn-back:active:not([disabled]) { transform: translateY(2px); border-bottom-width: 2px; }
         .btn-back:disabled { opacity: 0.3; cursor: not-allowed; background: #FAFAFA; }
 
-        /* --- ESTILOS DE IMAGEM (NOVO) --- */
+        /* --- ESTILOS DE IMAGEM --- */
         /* Logo Splash */
         .splash-logo-img {
             width: 140px; height: auto; margin-bottom: 10px;
             display: block; margin-left: auto; margin-right: auto;
-            /* Truque CSS para remover fundo branco de JPG em fundo colorido */
             mix-blend-mode: multiply; 
         }
         .splash-logo-fallback { font-size: 4rem; margin-bottom: 10px; display: block; }
 
-        /* Aumentei o margin-bottom de 30px para 60px para afastar do input */
+        /* Espaçamento do Título */
         .splash-title { font-size: 2.5rem; color: white; margin-bottom: 60px; text-shadow: 0 2px 0 rgba(0,0,0,0.1); }
 
         /* Header */
@@ -243,10 +286,9 @@
         /* Utils */
         .lang-container { width: 100%; padding: 0 20px; }
         
-        /* Ajuste do layout da Splash Screen */
         #screen-splash {
             justify-content: flex-start; /* Alinha conteúdo ao topo */
-            padding-top: 15vh; /* Empurra para baixo (mas mais alto que o centro) */
+            padding-top: 15vh;
             align-items: center; text-align: center;
             background: linear-gradient(180deg, var(--secondary) 0%, #FFF 100%);
         }
@@ -257,7 +299,6 @@
     <div id="app">
         <!-- TELA 1: SPLASH (Com Imagem de Logo) -->
         <section id="screen-splash" class="screen">
-            <!-- Logo Atualizado: imglogo.jpg com blend mode -->
             <img src="img/imglogo.jpg" 
                  class="splash-logo-img" 
                  alt="Logo SkillPlay" 
@@ -266,17 +307,28 @@
             <div id="splash-fallback" class="splash-logo-fallback" style="display:none;">🧩</div>
 
             <h1 class="splash-title">SkillPlay</h1>
+            
+            <!-- Campo de Nome -->
             <input type="text" id="player-name" class="name-input" placeholder="Seu nome / Tu nombre" maxlength="15">
+            
+            <!-- Seleção de Idioma -->
             <div class="lang-container">
-                <button class="btn btn-secondary" onclick="window.app.setLanguage('pt')">Português 🇧🇷</button>
-                <button class="btn btn-accent" onclick="window.app.setLanguage('es')">Español 🇪🇸</button>
+                <p style="color:white; font-family:'Fredoka',sans-serif; margin-bottom:10px;">Idioma:</p>
+                <div class="lang-options">
+                    <button id="btn-pt" class="btn-lang selected" onclick="window.app.selectLang('pt')">Português 🇧🇷</button>
+                    <button id="btn-es" class="btn-lang" onclick="window.app.selectLang('es')">Español 🇪🇸</button>
+                </div>
+                
+                <!-- Botão PLAY -->
+                <button class="btn btn-play" onclick="window.app.tryStartGame()">
+                    PLAY ▶
+                </button>
             </div>
         </section>
 
         <!-- TELA 2: HOME (Com Logos e Banners) -->
         <section id="screen-home" class="screen hidden">
             <header>
-                <!-- Logo Pequeno no Header Atualizado: imglogo_small.jpg -->
                 <div class="logo-container">
                     <img src="img/imglogo_small.jpg" 
                          class="header-logo-img" 
@@ -297,12 +349,11 @@
                 <!-- História 1: A Timidez -->
                 <div class="story-card" onclick="window.app.startStory('story_shyness')">
                     <div class="card-img-area">
-                        <!-- Banner da História 1 Atualizado: imgbanner_timidez.jpg -->
                         <img src="img/imgbanner_timidez.jpg" 
                              class="card-banner" 
                              alt="Banner Timidez"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span style="display:none; font-size:3rem;">🙈</span> <!-- Fallback Emoji -->
+                        <span style="display:none; font-size:3rem;">🙈</span>
                     </div>
                     <div class="card-content">
                         <h3 class="card-title" id="txt-story1-title">História 1: A Timidez</h3>
@@ -312,12 +363,11 @@
                 <!-- História 2: O Medo -->
                 <div class="story-card" onclick="window.app.startStory('story_fear')">
                     <div class="card-img-area">
-                         <!-- Banner da História 2 Atualizado: imgbanner_medo.jpg -->
                         <img src="img/imgbanner_medo.jpg" 
                              class="card-banner" 
                              alt="Banner Medo"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                        <span style="display:none; font-size:3rem;">😨</span> <!-- Fallback Emoji -->
+                        <span style="display:none; font-size:3rem;">😨</span>
                     </div>
                     <div class="card-content">
                         <h3 class="card-title" id="txt-story2-title">História 2: O Medo</h3>
@@ -380,7 +430,6 @@
                 
                 // --- HISTÓRIA 1: A TIMIDEZ ---
                 story_shyness: {
-                    // CENA 1: INTRODUÇÃO
                     'intro': {
                         text: "Você chegou na escola nova. O recreio começou e tem um grupo brincando de pega-pega.",
                         img: "img/timidez_intro.jpg", 
@@ -390,7 +439,6 @@
                             { text: "Ficar só olhando de longe. (Passiva)", score: 1, nextScene: 'scene_2_passive' }
                         ]
                     },
-                    // CENA 2: RAMIFICAÇÃO (Ativa vs Passiva)
                     'scene_2_active': {
                         text: "Você correu para brincar, mas tropeçou na frente de todo mundo! Alguns riram.",
                         img: "img/timidez_tropeco.jpg",
@@ -409,7 +457,6 @@
                             { text: "Fingir que não viu a bola. (Evitação)", score: 0, nextScene: 'scene_3_isolated' }
                         ]
                     },
-                    // CENA 3: INTERAÇÃO OU ISOLAMENTO
                     'scene_3_interaction': {
                         text: "Um menino chamado Lucas disse: 'Belo chute!'. Ele parece legal.",
                         img: "img/timidez_lucas.jpg",
@@ -428,7 +475,6 @@
                             { text: "Baixar a cabeça e não responder.", score: 0, nextScene: 'scene_4_class' }
                         ]
                     },
-                    // CENA 4: CLÍMAX DO DIA
                     'scene_4_friendship': {
                         text: "Lucas te chamou para sentar com o grupo dele na hora do lanche!",
                         img: "img/timidez_lanche.jpg",
@@ -456,7 +502,6 @@
                             { text: "Esperar todos entrarem pra seguir.", score: 1, nextScene: 'scene_5_end' }
                         ]
                     },
-                    // CENA 5: CONCLUSÃO
                     'scene_5_end': {
                         text: "O dia acabou! Sua mãe está no portão e pergunta: 'Como foi o primeiro dia?'",
                         img: "img/timidez_mae.jpg",
@@ -470,7 +515,6 @@
 
                 // --- HISTÓRIA 2: O MEDO ---
                 story_fear: {
-                    // CENA 1
                     'intro': {
                         text: "A professora chamou seu nome para apresentar o trabalho. O coração bateu muito rápido.",
                         img: "img/medo_intro.jpg",
@@ -480,7 +524,6 @@
                             { text: "Dizer que esqueceu o caderno. (Fuga)", score: 0, nextScene: 'scene_2_desk' }
                         ]
                     },
-                    // CENA 2
                     'scene_2_front': {
                         text: "Você chegou lá na frente, mas sua voz sumiu. Todos estão olhando.",
                         img: "img/medo_frente.jpg",
@@ -499,7 +542,6 @@
                             { text: "Continuar sentado.", score: 0, nextScene: 'scene_3_break' }
                         ]
                     },
-                    // CENA 3
                     'scene_3_speech': {
                         text: "Você começou a falar. Um colega lá no fundo deu uma risadinha.",
                         img: "img/medo_risada.jpg",
@@ -527,7 +569,6 @@
                             { text: "Guardar o desenho na mochila.", score: 0, nextScene: 'scene_5_end' }
                         ]
                     },
-                    // CENA 4
                     'scene_4_applause': {
                         text: "Você terminou! A turma toda bateu palmas para você.",
                         img: "img/medo_palmas.jpg",
@@ -555,7 +596,6 @@
                             { text: "Encogerse de hombros.", score: 1, nextScene: 'scene_5_end' }
                         ]
                     },
-                    // CENA 5
                     'scene_5_end': {
                         text: "A aula acabou. Como você se sente agora?",
                         img: "img/medo_saida.jpg",
@@ -782,7 +822,8 @@
             historyStack: [],
             pendingScore: 0,
             pendingNextScene: '', 
-            playerName: ''
+            playerName: '',
+            tempLang: 'pt' // Idioma selecionado temporariamente no menu
         };
 
         window.app = {
@@ -791,7 +832,18 @@
                 document.getElementById(screenId).classList.remove('hidden');
             },
 
-            setLanguage: (lang) => {
+            // Função chamada ao clicar nos botões de idioma
+            selectLang: (lang) => {
+                state.tempLang = lang;
+                
+                // Atualiza visual dos botões
+                document.getElementById('btn-pt').classList.remove('selected');
+                document.getElementById('btn-es').classList.remove('selected');
+                document.getElementById(`btn-${lang}`).classList.add('selected');
+            },
+
+            // Função chamada ao clicar em PLAY
+            tryStartGame: () => {
                 const nameInput = document.getElementById('player-name');
                 const nameVal = nameInput.value.trim();
 
@@ -805,17 +857,25 @@
                     return;
                 }
 
-                state.lang = lang;
+                // Salva nome e idioma definitivo
                 state.playerName = nameVal;
+                state.lang = state.tempLang;
 
-                const greetingTemplate = DB[lang].greeting;
+                // Atualiza textos da interface com o idioma escolhido
+                const greetingTemplate = DB[state.lang].greeting;
                 document.getElementById('home-greeting').innerText = greetingTemplate.replace('[nome]', state.playerName);
 
-                document.getElementById('txt-story1-title').innerText = DB[lang].story1Title;
-                document.getElementById('txt-story2-title').innerText = DB[lang].story2Title;
-                document.querySelector('#screen-result button').innerText = DB[lang].backBtn;
+                document.getElementById('txt-story1-title').innerText = DB[state.lang].story1Title;
+                document.getElementById('txt-story2-title').innerText = DB[state.lang].story2Title;
+                document.querySelector('#screen-result button').innerText = DB[state.lang].backBtn;
 
+                // Vai para a Home
                 window.app.showScreen('screen-home');
+            },
+
+            // [Mantém compatibilidade com chamadas antigas se houver, mas agora o fluxo é via tryStartGame]
+            setLanguage: (lang) => {
+                window.app.selectLang(lang);
             },
 
             goToHome: () => {
