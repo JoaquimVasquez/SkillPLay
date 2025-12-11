@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SkillPlay - Versão Final</title>
+    
+    <!-- Tipografia Profissional -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- DESIGN SYSTEM --- */
+        :root {
+            --primary: #58CC02;
+            --primary-shadow: #46a302;
+            --secondary: #1CB0F6;
+            --secondary-shadow: #1899d6;
+            --accent: #FF9600;
+            --accent-shadow: #cc7800;
+            --danger: #FF4B4B;
+            --danger-shadow: #d43636;
+            --neutral: #E5E5E5;
+            --text: #4B4B4B;
+            --white: #FFFFFF;
+            --bg-app: #FFFFFF;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #235390;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            max-height: 850px;
+            background-color: var(--bg-app);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 421px) {
+            #app {
+                height: 90vh;
+                border-radius: 30px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                border: 8px solid #183E70;
+            }
+        }
+
+        .hidden { display: none !important; }
+        .screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            animation: fadeIn 0.4s ease-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 { font-family: 'Fredoka', sans-serif; color: var(--text); }
+        p { color: #777; font-size: 1.1rem; line-height: 1.5; font-family: 'Nunito', sans-serif; }
+
+        /* Input e Validação */
+        .name-input {
+            width: 90%;
+            padding: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem;
+            border: 3px solid var(--neutral);
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 25px;
+            outline: none;
+            color: var(--text);
+            transition: border-color 0.3s;
+        }
+        .name-input:focus { border-color: var(--secondary); }
+        .name-input::placeholder { color: #BBB; font-weight: 400; }
+        
+        .shake-animation {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: var(--danger) !important;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* Botões */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.0rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-bottom: 12px;
+            border-bottom: 5px solid rgba(0,0,0,0.2); 
+            line-height: 1.2;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn:active { transform: translateY(4px); border-bottom-width: 0px; margin-bottom: 17px; }
+        .btn-primary { background-color: var(--primary); border-bottom-color: var(--primary-shadow); }
+        .btn-secondary { background-color: var(--secondary); border-bottom-color: var(--secondary-shadow); }
+        .btn-accent { background-color: var(--accent); border-bottom-color: var(--accent-shadow); }
+
+        .btn-back {
+            position: absolute; top: 20px; left: 20px; width: 45px; height: 45px;
+            border-radius: 50%; background: #FFF; border: 2px solid var(--neutral);
+            border-bottom: 4px solid var(--neutral); font-size: 1.5rem;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; z-index: 50; transition: all 0.2s;
+        }
+        .btn-back:active:not([disabled]) { transform: translateY(2px); border-bottom-width: 2px; }
+        .btn-back:disabled { opacity: 0.3; cursor: not-allowed; background: #FAFAFA; }
+
+        /* --- ESTILOS DE IMAGEM (NOVO) --- */
+        /* Logo Splash */
+        .splash-logo-img {
+            width: 140px; height: auto; margin-bottom: 10px;
+            display: block; margin-left: auto; margin-right: auto;
+            /* Truque CSS para remover fundo branco de JPG em fundo colorido */
+            mix-blend-mode: multiply; 
+        }
+        .splash-logo-fallback { font-size: 4rem; margin-bottom: 10px; display: block; }
+
+        /* Aumentei o margin-bottom de 30px para 60px para afastar do input */
+        .splash-title { font-size: 2.5rem; color: white; margin-bottom: 60px; text-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+
+        /* Header */
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 2px solid var(--neutral); margin-bottom: 20px;
+        }
+        .header-logo-img { height: 40px; width: auto; }
+        .header-logo-text { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--primary); }
+
+        /* Stats */
+        .stat-item {
+            display: flex; align-items: center; font-weight: bold; font-family: 'Fredoka', sans-serif;
+            font-size: 1.2rem; color: var(--accent); background: #FFF8E1;
+            padding: 5px 15px; border-radius: 20px;
+        }
+
+        /* Story Cards */
+        .story-list { display: flex; flex-direction: column; gap: 20px; }
+        .story-card {
+            border: 2px solid var(--neutral); border-radius: var(--radius); padding: 0;
+            cursor: pointer; transition: transform 0.2s; background: white;
+            border-bottom: 4px solid var(--neutral); overflow: hidden;
+        }
+        .story-card:active { transform: scale(0.98); }
+        .story-card.locked { opacity: 0.6; filter: grayscale(100%); pointer-events: none; }
+        
+        .card-img-area {
+            height: 120px; background-color: var(--secondary);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 3rem; overflow: hidden; position: relative;
+        }
+        .card-banner {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .card-content { padding: 15px; }
+        .card-title { font-size: 1.2rem; margin-bottom: 5px; }
+        .card-status { font-size: 0.8rem; color: #999; text-transform: uppercase; font-weight: bold; }
+
+        /* Game Visual */
+        #game-visual-area {
+            height: 200px; background-color: #E1F5FE; border-radius: var(--radius);
+            display: flex; justify-content: center; align-items: center;
+            margin-top: 50px; margin-bottom: 15px; border: 2px solid #B3E5FC;
+            overflow: hidden; position: relative;
+        }
+        .story-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #game-visual-area span.emoji { font-size: 5rem; }
+
+        #game-text {
+            font-size: 1.1rem; color: var(--text); text-align: center;
+            margin-bottom: 20px; background: #FFF; padding: 10px;
+            min-height: 80px; display: flex; align-items: center; justify-content: center;
+        }
+        .choices-wrapper { margin-top: auto; display: flex; flex-direction: column; gap: 5px; }
+
+        #screen-result { text-align: center; justify-content: center; }
+        .result-emoji { font-size: 5rem; margin-bottom: 20px; animation: bounce 2s infinite; }
+        .result-score-box {
+            background: #F0F0F0; padding: 20px; border-radius: var(--radius); margin: 20px 0;
+            font-size: 1.5rem; font-weight: bold; color: var(--text); font-family: 'Fredoka', sans-serif;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+
+        #modal-feedback {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: flex-end;
+            z-index: 100;
+        }
+        .modal-sheet {
+            background: white; width: 100%; border-top-left-radius: 25px; border-top-right-radius: 25px;
+            padding: 30px 20px; text-align: center; animation: slideUp 0.3s ease-out;
+            max-height: 80vh; overflow-y: auto;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .feedback-emoji { font-size: 3rem; margin-bottom: 10px; display: block; }
+        .feedback-title { color: var(--primary); font-size: 1.5rem; margin-bottom: 10px; }
+        .feedback-points { font-weight: bold; color: var(--accent); margin-bottom: 20px; display: block; }
+        
+        /* Utils */
+        .lang-container { width: 100%; padding: 0 20px; }
+        
+        /* Ajuste do layout da Splash Screen */
+        #screen-splash {
+            justify-content: flex-start; /* Alinha conteúdo ao topo */
+            padding-top: 15vh; /* Empurra para baixo (mas mais alto que o centro) */
+            align-items: center; text-align: center;
+            background: linear-gradient(180deg, var(--secondary) 0%, #FFF 100%);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- TELA 1: SPLASH (Com Imagem de Logo) -->
+        <section id="screen-splash" class="screen">
+            <!-- Logo Atualizado: imglogo.jpg com blend mode -->
+            <img src="img/imglogo.jpg" 
+                 class="splash-logo-img" 
+                 alt="Logo SkillPlay" 
+                 onerror="this.style.display='none'; document.getElementById('splash-fallback').style.display='block';">
+            
+            <div id="splash-fallback" class="splash-logo-fallback" style="display:none;">🧩</div>
+
+            <h1 class="splash-title">SkillPlay</h1>
+            <input type="text" id="player-name" class="name-input" placeholder="Seu nome / Tu nombre" maxlength="15">
+            <div class="lang-container">
+                <button class="btn btn-secondary" onclick="window.app.setLanguage('pt')">Português 🇧🇷</button>
+                <button class="btn btn-accent" onclick="window.app.setLanguage('es')">Español 🇪🇸</button>
+            </div>
+        </section>
+
+        <!-- TELA 2: HOME (Com Logos e Banners) -->
+        <section id="screen-home" class="screen hidden">
+            <header>
+                <!-- Logo Pequeno no Header Atualizado: imglogo_small.jpg -->
+                <div class="logo-container">
+                    <img src="img/imglogo_small.jpg" 
+                         class="header-logo-img" 
+                         alt="SkillPlay"
+                         onerror="this.style.display='none'; document.getElementById('header-fallback').style.display='block';">
+                    <span id="header-fallback" class="header-logo-text" style="display:none;">SkillPlay</span>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="stat-item" title="Estrelas">
+                        <span class="stat-icon">⭐</span>
+                        <span class="stat-val" id="ui-score">0</span>
+                    </div>
+                </div>
+            </header>
+            <h2 id="home-greeting" style="margin-bottom: 20px;">Olá!</h2>
+            <div class="story-list">
+                <!-- História 1: A Timidez -->
+                <div class="story-card" onclick="window.app.startStory('story_shyness')">
+                    <div class="card-img-area">
+                        <!-- Banner da História 1 Atualizado: imgbanner_timidez.jpg -->
+                        <img src="img/imgbanner_timidez.jpg" 
+                             class="card-banner" 
+                             alt="Banner Timidez"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span style="display:none; font-size:3rem;">🙈</span> <!-- Fallback Emoji -->
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title" id="txt-story1-title">História 1: A Timidez</h3>
+                        <span class="card-status" style="color: var(--primary)">▶ Jogar</span>
+                    </div>
+                </div>
+                <!-- História 2: O Medo -->
+                <div class="story-card" onclick="window.app.startStory('story_fear')">
+                    <div class="card-img-area">
+                         <!-- Banner da História 2 Atualizado: imgbanner_medo.jpg -->
+                        <img src="img/imgbanner_medo.jpg" 
+                             class="card-banner" 
+                             alt="Banner Medo"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span style="display:none; font-size:3rem;">😨</span> <!-- Fallback Emoji -->
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title" id="txt-story2-title">História 2: O Medo</h3>
+                        <span class="card-status" style="color: var(--secondary)">▶ Jogar</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA 3: JOGO (CENA NARRATIVA) -->
+        <section id="screen-game" class="screen hidden">
+            <button class="btn-back" id="btn-undo" onclick="window.app.undo()">⬅️</button>
+            <div style="position: absolute; top: 35px; left: 80px; right: 20px; height: 10px; background: #EEE; border-radius: 5px;">
+                <div id="game-progress" style="height: 100%; width: 0%; background: var(--primary); border-radius: 5px; transition: width 0.3s;"></div>
+            </div>
+
+            <div id="game-visual-area">
+                <!-- Conteúdo injetado via JS -->
+            </div>
+            
+            <p id="game-text">Carregando história...</p>
+            <div class="choices-wrapper" id="choices-container"></div>
+        </section>
+
+        <!-- TELA 4: RESULTADO (FEEDBACK FINAL) -->
+        <section id="screen-result" class="screen hidden">
+            <div class="result-emoji" id="res-emoji">🎉</div>
+            <h2 id="result-title">Fim!</h2>
+            <p id="result-msg">Texto do resultado.</p>
+            <div class="result-score-box">
+                <p>⭐ <span id="res-score">0</span> / 10</p>
+            </div>
+            <button class="btn btn-primary" onclick="window.app.goToHome()">Voltar ao Menu</button>
+        </section>
+
+        <!-- FEEDBACK IMEDIATO (OVERLAY) -->
+        <div id="modal-feedback" class="hidden">
+            <div class="modal-sheet">
+                <span class="feedback-emoji" id="fb-emoji">🌟</span>
+                <h2 class="feedback-title" id="fb-title">Bom trabalho!</h2>
+                <p id="fb-text">Texto de feedback.</p>
+                <span class="feedback-points" id="fb-points">+ Estrelas</span>
+                <button class="btn btn-primary" onclick="window.app.nextScene()">Continuar</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * SkillPlay Final Extended Version
+         */
+        
+        const DB = {
+            pt: {
+                greeting: "Olá, [nome]!",
+                story1Title: "A Timidez",
+                story2Title: "O Medo",
+                backBtn: "Voltar ao Menu",
+                
+                // --- HISTÓRIA 1: A TIMIDEZ ---
+                story_shyness: {
+                    // CENA 1: INTRODUÇÃO
+                    'intro': {
+                        text: "Você chegou na escola nova. O recreio começou e tem um grupo brincando de pega-pega.",
+                        img: "img/timidez_intro.jpg", 
+                        progress: 10,
+                        choices: [
+                            { text: "Tentar brincar com eles. (Assertiva)", score: 2, nextScene: 'scene_2_active' },
+                            { text: "Ficar só olhando de longe. (Passiva)", score: 1, nextScene: 'scene_2_passive' }
+                        ]
+                    },
+                    // CENA 2: RAMIFICAÇÃO (Ativa vs Passiva)
+                    'scene_2_active': {
+                        text: "Você correu para brincar, mas tropeçou na frente de todo mundo! Alguns riram.",
+                        img: "img/timidez_tropeco.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Rir também e levantar rápido. (Resiliência)", score: 2, nextScene: 'scene_3_interaction' },
+                            { text: "Ficar vermelho e sair correndo. (Fuga)", score: 0, nextScene: 'scene_3_isolated' }
+                        ]
+                    },
+                    'scene_2_passive': {
+                        text: "Você ficou olhando. De repente, a bola rolou até o seu pé.",
+                        img: "img/timidez_bola.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Chutar a bola de volta e sorrir. (Interação)", score: 2, nextScene: 'scene_3_interaction' },
+                            { text: "Fingir que não viu a bola. (Evitação)", score: 0, nextScene: 'scene_3_isolated' }
+                        ]
+                    },
+                    // CENA 3: INTERAÇÃO OU ISOLAMENTO
+                    'scene_3_interaction': {
+                        text: "Um menino chamado Lucas disse: 'Belo chute!'. Ele parece legal.",
+                        img: "img/timidez_lucas.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Dizer: 'Obrigado! Sou [nome]'.", score: 2, nextScene: 'scene_4_friendship' },
+                            { text: "Apenas sorrir sem falar nada.", score: 1, nextScene: 'scene_4_class' }
+                        ]
+                    },
+                    'scene_3_isolated': {
+                        text: "Você se sentou sozinho no banco. A Professora Ana percebeu que você está triste.",
+                        img: "img/timidez_professora.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Dizer 'Estou com vergonha'. (Expressão)", score: 2, nextScene: 'scene_4_support' },
+                            { text: "Baixar a cabeça e não responder.", score: 0, nextScene: 'scene_4_class' }
+                        ]
+                    },
+                    // CENA 4: CLÍMAX DO DIA
+                    'scene_4_friendship': {
+                        text: "Lucas te chamou para sentar com o grupo dele na hora do lanche!",
+                        img: "img/timidez_lanche.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Aceitar e ir junto! (Coragem)", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Dizer 'Talvez amanhã' e ficar só.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_support': {
+                        text: "A professora te apresentou um grupo calmo que gosta de ler gibis.",
+                        img: "img/timidez_gibis.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Perguntar o que eles estão lendo.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Sentar perto mas não falar nada.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_class': {
+                        text: "O sinal tocou para voltar pra sala. Você não sabe onde é a sala.",
+                        img: "img/timidez_sala.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Perguntar para alguém no corredor.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Esperar todos entrarem pra seguir.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    // CENA 5: CONCLUSÃO
+                    'scene_5_end': {
+                        text: "O dia acabou! Sua mãe está no portão e pergunta: 'Como foi o primeiro dia?'",
+                        img: "img/timidez_mae.jpg",
+                        progress: 90,
+                        choices: [
+                            { text: "Contar o que aconteceu (Verdade).", score: 2, nextScene: 'finish' },
+                            { text: "Dizer 'Foi normal'.", score: 1, nextScene: 'finish' }
+                        ]
+                    }
+                },
+
+                // --- HISTÓRIA 2: O MEDO ---
+                story_fear: {
+                    // CENA 1
+                    'intro': {
+                        text: "A professora chamou seu nome para apresentar o trabalho. O coração bateu muito rápido.",
+                        img: "img/medo_intro.jpg",
+                        progress: 10,
+                        choices: [
+                            { text: "Levantar e ir lá na frente. (Enfrentamento)", score: 2, nextScene: 'scene_2_front' },
+                            { text: "Dizer que esqueceu o caderno. (Fuga)", score: 0, nextScene: 'scene_2_desk' }
+                        ]
+                    },
+                    // CENA 2
+                    'scene_2_front': {
+                        text: "Você chegou lá na frente, mas sua voz sumiu. Todos estão olhando.",
+                        img: "img/medo_frente.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Respirar fundo e começar devagar.", score: 2, nextScene: 'scene_3_speech' },
+                            { text: "Olhar para a professora pedindo ajuda.", score: 1, nextScene: 'scene_3_help' }
+                        ]
+                    },
+                    'scene_2_desk': {
+                        text: "A professora disse: 'Tem certeza? Você fez um desenho tão bonito'.",
+                        img: "img/medo_carteira.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Mudar de ideia e ir apresentar.", score: 2, nextScene: 'scene_3_speech' },
+                            { text: "Continuar sentado.", score: 0, nextScene: 'scene_3_break' }
+                        ]
+                    },
+                    // CENA 3
+                    'scene_3_speech': {
+                        text: "Você começou a falar. Um colega lá no fundo deu uma risadinha.",
+                        img: "img/medo_risada.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Ignorar e continuar falando.", score: 2, nextScene: 'scene_4_applause' },
+                            { text: "Parar e ficar quieto.", score: 0, nextScene: 'scene_4_silence' }
+                        ]
+                    },
+                    'scene_3_help': {
+                        text: "A professora ficou do seu lado. 'Eu seguro o cartaz pra você', ela disse.",
+                        img: "img/medo_ajuda.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Agradecer e ler o papel.", score: 2, nextScene: 'scene_4_applause' },
+                            { text: "Deixar a professora ler por você.", score: 1, nextScene: 'scene_4_silence' }
+                        ]
+                    },
+                    'scene_3_break': {
+                        text: "Chegou a hora do recreio. Você está aliviado, mas um pouco triste por não ter ido.",
+                        img: "img/medo_recreio.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Mostrar o desenho para um amigo.", score: 2, nextScene: 'scene_4_friend' },
+                            { text: "Guardar o desenho na mochila.", score: 0, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    // CENA 4
+                    'scene_4_applause': {
+                        text: "Você terminou! A turma toda bateu palmas para você.",
+                        img: "img/medo_palmas.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Sorrir e agradecer.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Correr rápido pro lugar.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_silence': {
+                        text: "Acabou. Foi difícil, mas você sobreviveu!",
+                        img: "img/medo_fim.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Pensar: 'Pelo menos eu tentei'.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Pensar: 'Nunca mais faço isso'.", score: 0, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_friend': {
+                        text: "Seu amigo adorou o desenho! 'Você devia ter mostrado lá na frente!', ele disse.",
+                        img: "img/medo_amigo.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Prometer intentar na próxima vez.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Encogerse de hombros.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    // CENA 5
+                    'scene_5_end': {
+                        text: "A aula acabou. Como você se sente agora?",
+                        img: "img/medo_saida.jpg",
+                        progress: 90,
+                        choices: [
+                            { text: "Orgulhoso ou Aliviado.", score: 2, nextScene: 'finish' },
+                            { text: "Ainda com medo.", score: 1, nextScene: 'finish' }
+                        ]
+                    }
+                },
+                
+                endings: {
+                    high: { title: "Super Habilidade! 🌟", text: "Você enfrentou seus medos e fez ótimas escolhas! Parabéns!", emoji: "🏆" },
+                    mid: { title: "Bom Aprendizado! 🙂", text: "Você tentou e isso é o que importa. A cada dia fica mais fácil.", emoji: "🌱" },
+                    low: { title: "Vamos Tentar de Novo? 🛡️", text: "Hoje foi difícil, né? Respire fundo. Amanhã é um novo dia.", emoji: "💙" }
+                },
+                feedbackDefault: {
+                    assertive: { title: "Muito Bem!", text: "Isso ajuda a crescer!", emoji: "🦁" },
+                    passive: { title: "Tudo bem...", text: "Respeite seu tempo.", emoji: "🛡️" }
+                }
+            },
+            es: {
+                greeting: "¡Hola, [nome]!",
+                story1Title: "La Timidez",
+                story2Title: "El Miedo",
+                backBtn: "Volver al Menú",
+                
+                // --- HISTORIA 1: LA TIMIDEZ (ES) ---
+                story_shyness: {
+                    'intro': {
+                        text: "Llegaste a la escuela nueva. Empezó el recreo y hay un grupo jugando.",
+                        img: "img/timidez_intro.jpg", 
+                        progress: 10,
+                        choices: [
+                            { text: "Intentar jugar con ellos. (Asertiva)", score: 2, nextScene: 'scene_2_active' },
+                            { text: "Mirar desde lejos. (Pasiva)", score: 1, nextScene: 'scene_2_passive' }
+                        ]
+                    },
+                    'scene_2_active': {
+                        text: "Corriste para jugar, ¡pero tropezaste frente a todos! Algunos se rieron.",
+                        img: "img/timidez_tropeco.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Reírte también y levantarte. (Resiliencia)", score: 2, nextScene: 'scene_3_interaction' },
+                            { text: "Ponerte rojo y salir corriendo. (Huida)", score: 0, nextScene: 'scene_3_isolated' }
+                        ]
+                    },
+                    'scene_2_passive': {
+                        text: "Te quedaste mirando. De repente, la pelota rodó hasta tu pie.",
+                        img: "img/timidez_bola.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Patear la pelota de vuelta y sonreír.", score: 2, nextScene: 'scene_3_interaction' },
+                            { text: "Fingir que no viste la pelota.", score: 0, nextScene: 'scene_3_isolated' }
+                        ]
+                    },
+                    'scene_3_interaction': {
+                        text: "Un niño llamado Lucas dijo: '¡Buen tiro!'. Parece amable.",
+                        img: "img/timidez_lucas.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Decir: '¡Gracias! Soy [nome]'.", score: 2, nextScene: 'scene_4_friendship' },
+                            { text: "Solo sonreír sin hablar.", score: 1, nextScene: 'scene_4_class' }
+                        ]
+                    },
+                    'scene_3_isolated': {
+                        text: "Te sentaste solo en el banco. La Maestra Ana notó que estás triste.",
+                        img: "img/timidez_professora.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Decir 'Tengo vergüenza'. (Expresión)", score: 2, nextScene: 'scene_4_support' },
+                            { text: "Bajar la cabeza y no responder.", score: 0, nextScene: 'scene_4_class' }
+                        ]
+                    },
+                    'scene_4_friendship': {
+                        text: "¡Lucas te invitó a sentarte con su grupo en el almuerzo!",
+                        img: "img/timidez_lanche.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "¡Aceptar e ir juntos! (Valentía)", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Decir 'Tal vez mañana' y quedarte solo.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_support': {
+                        text: "La maestra te presentó un grupo tranquilo que lee cómics.",
+                        img: "img/timidez_gibis.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Preguntar qué están leyendo.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Sentarte cerca pero no hablar.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_class': {
+                        text: "Sonó el timbre. No sabes dónde es el salón.",
+                        img: "img/timidez_sala.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Preguntar a alguien en el pasillo.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Esperar a que todos entren.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_5_end': {
+                        text: "¡Terminó el día! Tu mamá pregunta: '¿Cómo fue el primer día?'",
+                        img: "img/timidez_mae.jpg",
+                        progress: 90,
+                        choices: [
+                            { text: "Contar lo que pasó (Verdad).", score: 2, nextScene: 'finish' },
+                            { text: "Decir 'Fue normal'.", score: 1, nextScene: 'finish' }
+                        ]
+                    }
+                },
+
+                // --- HISTORIA 2: EL MIEDO (ES) ---
+                story_fear: {
+                    'intro': {
+                        text: "La maestra llamó tu nombre para presentar. El corazón late rápido.",
+                        img: "img/medo_intro.jpg",
+                        progress: 10,
+                        choices: [
+                            { text: "Levantarse e ir al frente. (Afrontamiento)", score: 2, nextScene: 'scene_2_front' },
+                            { text: "Decir que olvidaste el cuaderno. (Huida)", score: 0, nextScene: 'scene_2_desk' }
+                        ]
+                    },
+                    'scene_2_front': {
+                        text: "Llegaste al frente, pero tu voz desapareció. Todos miran.",
+                        img: "img/medo_frente.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Respirar hondo y empezar despacio.", score: 2, nextScene: 'scene_3_speech' },
+                            { text: "Mirar a la maestra pidiendo ayuda.", score: 1, nextScene: 'scene_3_help' }
+                        ]
+                    },
+                    'scene_2_desk': {
+                        text: "La maestra dijo: '¿Seguro? Hiciste un dibujo tan bonito'.",
+                        img: "img/medo_carteira.jpg",
+                        progress: 30,
+                        choices: [
+                            { text: "Cambiar de idea e ir a presentar.", score: 2, nextScene: 'scene_3_speech' },
+                            { text: "Seguir sentado.", score: 0, nextScene: 'scene_3_break' }
+                        ]
+                    },
+                    'scene_3_speech': {
+                        text: "Empezaste a hablar. Un compañero al fondo se rió un poco.",
+                        img: "img/medo_risada.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Ignorar y seguir hablando.", score: 2, nextScene: 'scene_4_applause' },
+                            { text: "Parar y quedarte callado.", score: 0, nextScene: 'scene_4_silence' }
+                        ]
+                    },
+                    'scene_3_help': {
+                        text: "La maestra se puso a tu lado. 'Yo sostengo el cartel', dijo.",
+                        img: "img/medo_ajuda.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Agradecer y leer el papel.", score: 2, nextScene: 'scene_4_applause' },
+                            { text: "Dejar que la maestra lea por ti.", score: 1, nextScene: 'scene_4_silence' }
+                        ]
+                    },
+                    'scene_3_break': {
+                        text: "Llegó el recreo. Estás aliviado, pero un poco triste.",
+                        img: "img/medo_recreio.jpg",
+                        progress: 50,
+                        choices: [
+                            { text: "Mostrar el dibujo a un amigo.", score: 2, nextScene: 'scene_4_friend' },
+                            { text: "Guardar el dibujo en la mochila.", score: 0, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_applause': {
+                        text: "¡Terminaste! Toda la clase aplaudió.",
+                        img: "img/medo_palmas.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Sonreír y agradecer.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Correr rápido a tu lugar.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_silence': {
+                        text: "Terminó. Fue difícil, ¡pero sobreviviste!",
+                        img: "img/medo_fim.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Pensar: 'Al menos lo intenté'.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Pensar: 'Nunca más hago esto'.", score: 0, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_4_friend': {
+                        text: "¡A tu amigo le encantó! 'Debiste mostrarlo al frente', dijo.",
+                        img: "img/medo_amigo.jpg",
+                        progress: 70,
+                        choices: [
+                            { text: "Prometer intentar la próxima vez.", score: 2, nextScene: 'scene_5_end' },
+                            { text: "Encogerse de hombros.", score: 1, nextScene: 'scene_5_end' }
+                        ]
+                    },
+                    'scene_5_end': {
+                        text: "Terminó la clase. ¿Cómo te sientes ahora?",
+                        img: "img/medo_saida.jpg",
+                        progress: 90,
+                        choices: [
+                            { text: "Orgulloso o Aliviado.", score: 2, nextScene: 'finish' },
+                            { text: "Todavía con miedo.", score: 1, nextScene: 'finish' }
+                        ]
+                    }
+                },
+                
+                endings: {
+                    high: { title: "¡Súper Habilidad! 🌟", text: "¡Enfrentaste tus miedos y tomaste grandes decisiones! ¡Felicidades!", emoji: "🏆" },
+                    mid: { title: "¡Buen Aprendizaje! 🙂", text: "Intentaste y eso es lo que importa. Cada día es más fácil.", emoji: "🌱" },
+                    low: { title: "¿Intentamos de nuevo? 🛡️", text: "¿Fue difícil hoy? Está bien. Respira hondo. Mañana es otro día.", emoji: "💙" }
+                },
+                feedbackDefault: {
+                    assertive: { title: "¡Muy Bien!", text: "¡Esto ayuda a crecer!", emoji: "🦁" },
+                    passive: { title: "Está bien...", text: "Respeta tu tiempo.", emoji: "🛡️" }
+                }
+            }
+        };
+
+        const state = {
+            lang: 'pt',
+            score: 0,
+            currentStoryKey: '',
+            currentSceneId: '',
+            historyStack: [],
+            pendingScore: 0,
+            pendingNextScene: '', 
+            playerName: ''
+        };
+
+        window.app = {
+            showScreen: (screenId) => {
+                document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
+                document.getElementById(screenId).classList.remove('hidden');
+            },
+
+            setLanguage: (lang) => {
+                const nameInput = document.getElementById('player-name');
+                const nameVal = nameInput.value.trim();
+
+                if (!nameVal) {
+                    nameInput.classList.add('shake-animation');
+                    nameInput.style.borderColor = 'var(--danger)';
+                    setTimeout(() => {
+                        nameInput.classList.remove('shake-animation');
+                        nameInput.style.borderColor = 'var(--neutral)';
+                    }, 500);
+                    return;
+                }
+
+                state.lang = lang;
+                state.playerName = nameVal;
+
+                const greetingTemplate = DB[lang].greeting;
+                document.getElementById('home-greeting').innerText = greetingTemplate.replace('[nome]', state.playerName);
+
+                document.getElementById('txt-story1-title').innerText = DB[lang].story1Title;
+                document.getElementById('txt-story2-title').innerText = DB[lang].story2Title;
+                document.querySelector('#screen-result button').innerText = DB[lang].backBtn;
+
+                window.app.showScreen('screen-home');
+            },
+
+            goToHome: () => {
+                window.app.showScreen('screen-home');
+                window.app.updateStatsUI();
+            },
+
+            updateStatsUI: () => {
+                document.getElementById('ui-score').innerText = state.score;
+            },
+
+            startStory: (storyKey) => {
+                state.currentStoryKey = storyKey;
+                state.currentSceneId = 'intro';
+                state.score = 0;
+                state.historyStack = []; 
+                window.app.updateStatsUI();
+                
+                window.app.showScreen('screen-game');
+                window.app.renderScene();
+            },
+
+            renderScene: () => {
+                const storyData = DB[state.lang][state.currentStoryKey];
+                const scene = storyData[state.currentSceneId];
+                
+                if (!scene) return;
+
+                document.getElementById('game-progress').style.width = `${scene.progress}%`;
+                const btnUndo = document.getElementById('btn-undo');
+                btnUndo.disabled = (state.historyStack.length === 0);
+
+                const visualArea = document.getElementById('game-visual-area');
+                visualArea.innerHTML = ''; 
+
+                const imgContent = scene.img;
+                const isFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(imgContent) || imgContent.includes('/');
+
+                if (isFile) {
+                    const imgTag = document.createElement('img');
+                    imgTag.src = imgContent;
+                    imgTag.className = "story-img";
+                    imgTag.alt = "Cena da história";
+                    imgTag.onerror = function() {
+                        this.style.display = 'none';
+                        visualArea.innerHTML = '<span class="emoji">📖</span>'; 
+                    };
+                    visualArea.appendChild(imgTag);
+                } else {
+                    visualArea.innerHTML = `<span class="emoji">${imgContent}</span>`;
+                }
+
+                document.getElementById('game-text').innerText = scene.text;
+                const container = document.getElementById('choices-container');
+                container.innerHTML = ''; 
+
+                scene.choices.forEach((choice, index) => {
+                    const btn = document.createElement('button');
+                    let btnClass = 'btn-secondary';
+                    if (choice.score === 2) btnClass = 'btn-primary'; 
+                    else if (choice.score === 1) btnClass = 'btn-accent'; 
+                    
+                    btn.className = `btn ${btnClass}`;
+                    btn.innerText = choice.text;
+                    btn.onclick = () => window.app.makeChoice(index);
+                    container.appendChild(btn);
+                });
+            },
+
+            makeChoice: (choiceIndex) => {
+                const storyData = DB[state.lang][state.currentStoryKey];
+                const scene = storyData[state.currentSceneId];
+                const choice = scene.choices[choiceIndex];
+
+                state.historyStack.push({
+                    sceneId: state.currentSceneId,
+                    scoreAtMoment: state.score
+                });
+
+                state.pendingScore = choice.score;
+                state.pendingNextScene = choice.nextScene; 
+
+                // Não mostra feedback se for o botão de finalizar
+                if (choice.nextScene === 'finish') {
+                    window.app.finishStory();
+                } else {
+                    window.app.showFeedback(choice.score);
+                }
+            },
+
+            showFeedback: (points) => {
+                const feedbackData = DB[state.lang].feedbackDefault;
+                let data = (points === 2) ? feedbackData.assertive : feedbackData.passive;
+                
+                document.getElementById('fb-emoji').innerText = data.emoji;
+                document.getElementById('fb-title').innerText = data.title;
+                document.getElementById('fb-text').innerText = data.text;
+                document.getElementById('fb-points').innerText = `+${points} Estrelas`;
+                
+                document.getElementById('modal-feedback').classList.remove('hidden');
+            },
+
+            nextScene: () => {
+                document.getElementById('modal-feedback').classList.add('hidden');
+                state.score += state.pendingScore;
+                window.app.updateStatsUI();
+
+                if (state.pendingNextScene === 'finish') {
+                    window.app.finishStory();
+                } else {
+                    state.currentSceneId = state.pendingNextScene;
+                    window.app.renderScene();
+                }
+            },
+
+            undo: () => {
+                if (state.historyStack.length === 0) return;
+                const lastState = state.historyStack.pop();
+                state.currentSceneId = lastState.sceneId;
+                state.score = lastState.scoreAtMoment;
+                window.app.updateStatsUI();
+                window.app.renderScene();
+            },
+
+            finishStory: () => {
+                const data = DB[state.lang];
+                // Lógica de 3 finais baseada na pontuação
+                // Máximo possível: 10 pontos (5 cenas * 2 pontos)
+                // Ouro: 8-10 | Prata: 4-7 | Bronze: 0-3
+                let ending;
+                if (state.score >= 8) {
+                    ending = data.endings.high;
+                } else if (state.score >= 4) {
+                    ending = data.endings.mid;
+                } else {
+                    ending = data.endings.low;
+                }
+
+                document.getElementById('res-emoji').innerText = ending.emoji;
+                document.getElementById('result-title').innerText = ending.title;
+                document.getElementById('result-msg').innerText = ending.text;
+                document.getElementById('res-score').innerText = state.score;
+
+                window.app.showScreen('screen-result');
+            }
+        };
+    </script>
+</body>
+</html>
